@@ -81,9 +81,8 @@ package ItemShopPackage
       %cl.centerPrint("\c6" @ %db.uiName SPC "\c2is no longer for sale", 4);
     }
 
+    $SHOP::DefaultShopData.saveData($SHOP::PriceSaveFileName);
     SHOP_updateAllPriceTags();
-
-    // TODO: Save changes to file.
   }
 
   function serverCmdSP(%cl, %price) {
@@ -117,6 +116,8 @@ package ItemShopPackage
     }
 
     $SHOP::DefaultShopData.setBuyOnce(%db, true);
+
+    $SHOP::DefaultShopData.saveData($SHOP::PriceSaveFileName);
     SHOP_updateAllPriceTags();
   }
 
@@ -145,6 +146,8 @@ package ItemShopPackage
     }
 
     $SHOP::DefaultShopData.setBuyOnce(%db, false);
+
+    $SHOP::DefaultShopData.saveData($SHOP::PriceSaveFileName);
     SHOP_updateAllPriceTags();
 
     // TODO: Remove this item from all client's virtual inventories.

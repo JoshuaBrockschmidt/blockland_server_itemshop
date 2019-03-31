@@ -74,7 +74,7 @@ function SHOP_ShopData::setBuyOnce(%this, %item, %buyOnce) {
 
   %priceData = %this.prices[%item];
   if (isObject(%priceData))
-    %priceData.buyOnce = %buyOnce;
+    %priceData.setBuyOnce(%buyOnce);
   else
     error("ERROR: Item is not for sale");
 }
@@ -106,25 +106,100 @@ function SHOP_ShopData::clearItems(%this) {
 // @param string filename	Path of file relative to the Blockland folder.
 // @return boolean	True if save was successful and false otherwise.
 function SHOP_ShopData::saveData(%this, %filename) {
-  // TODO: Get file name
-  // TODO: Check that file if writeable
-  // TODO: Write data in CSV format
-  error("ERROR: Not implemented yet");
-  return false;
+  if (!isWriteableFileName(%filename)) {
+    error("ERROR: File \"" @ %filename @ "\" is not writable");
+    return false;
+  }
+
+  %file = new FileObject();
+  %file.openForWrite(%filename);
+
+  // Write each item's price and buy once status in a CSV format, where each line is formatted as
+  //     <string: ITEM DATABLOCK>,<int: PRICE>,<boolean: BUY ONCE>
+  %priceCnt = %this.getCount();
+  for (%i = 0; %i < %priceCnt; %i++) {
+    %priceData = %this.getObject(%i);
+    %buyOnce = %priceData.buyOnce ? 1 : 0;
+    %file.writeLine("\"" @ %priceData.itemDb.getName() @ "\"," @ %priceData.price @ "," @ %buyOnce);
+  }
+
+  %file.close();
+
+  return true;
 }
 
 // Loads item price data from a file. Prices for the shop will be cleared regardless
-// of whether data load successfully.
+// of whether data loads successfully.
 // @param string filename	Path of file relative to the Blockland folder.
 // @return boolean	True if load was successful and false otherwise.
 function SHOP_ShopData::loadData(%this, %filename) {
-  //%this.clearItems();
-  // TODO: check that file exists
-  // TODO: load data
-  // TODO: data loads successfully, replace %this with %newShop
+  %this.clearItems();
 
-  error("ERROR: Not implemented yet");
-  return false;
+  if (!isFile(%filename)) {
+    error("ERROR: File \"" @ %filename @ "\" is not a file");
+    return false;
+  }
+
+  %file = new FileObject();
+  %file.openForRead(%filename);
+  %csvReader = SHOP_CSVReader(",");
+
+  %lineNum = 1;
+  while (!%file.isEOF()) {
+    %line = trim(%file.readLine());
+    if (%line !$= "") {
+      %csvReader.setDataString(%line);
+
+      if (!%csvReader.hasNextValue()) {
+	error("ERROR: Truncated item datablock on line" SPC %lineNum);
+	return false;
+      }
+
+      // Get the item datablock.
+      %db = %csvReader.readNextValue();
+      if (%db $= "" || !isObject(%db)) {
+	error("ERROR: Invalid item datablock on line" SPC %lineNum);
+	%file.close();
+	return false;
+      }
+
+      if (!%csvReader.hasNextValue()) {
+	error("ERROR: Truncated price on line" SPC %lineNum);
+	return false;
+      }
+
+      // Get the item's price.
+      %price = %csvReader.readNextValue();
+      if (%price $= "") {
+	error("ERROR: Invalid integer price on line" SPC %lineNum);
+	%file.close();
+	return false;
+      }
+      %price = mFloor(%price);
+      // TODO: Check if price is numeric
+
+      if (!%csvReader.hasNextValue()) {
+	error("ERROR: Truncated buy once status on line" SPC %lineNum);
+	return false;
+      }
+
+      // Get the item's buy once status.
+      %buyOnce = %csvReader.readNextValue();
+      if (%buyOnce $= "") {
+	error("ERROR: Invalid buy once boolean on line" SPC %lineNum);
+	%file.close();
+	return false;
+      }
+
+      %this.setPrice(%db, %price);
+      %this.setBuyOnce(%db, %buyOnce);
+    }
+    %lineNum++;
+  }
+
+  %file.close();
+
+  return true;
 }
 
 // Sets a directory for automatically saving price data to.

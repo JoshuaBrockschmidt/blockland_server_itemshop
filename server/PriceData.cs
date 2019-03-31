@@ -44,3 +44,9 @@ function SHOP_PriceData::setPrice(%this, %price) {
 function SHOP_PriceData::getPrice(%this) {
   return %this.price;
 }
+
+// Marks the item as buy once or single use.
+// @param boolean buyOnce	True if the item only needs to be bought once, and false if it is single use.
+function SHOP_PriceData::setBuyOnce(%this, %buyOnce) {
+  %this.buyOnce = %buyOnce;
+}

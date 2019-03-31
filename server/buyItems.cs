@@ -25,7 +25,7 @@ function GameConnection::SHOP_tryBuyItem(%this, %item)
     %msg = "Would you like to buy a" SPC %name SPC "for" SPC %price SPC "points?"
        NL "You will have" SPC %newScore SPC "points after purchasing.";
     %title = "Confirm Purchase";
-    if ($SHOP::DefaultShopData.getBuyOnce(%db))
+    if ($SHOP::DefaultShopData.getBuyOnce(%item))
       %title = %title SPC "(buy once)";
     else
       %title = %title SPC "(single use)";
