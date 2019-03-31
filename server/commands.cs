@@ -119,6 +119,8 @@ package ItemShopPackage
 
     $SHOP::DefaultShopData.saveData($SHOP::PriceSaveFileName);
     SHOP_updateAllPriceTags();
+
+    %cl.centerPrint("\c6" @ %db.uiName SPC "\c2is now buy once", 4);
   }
 
   function serverCmdMakeSingleUse(%cl) {
@@ -150,7 +152,7 @@ package ItemShopPackage
     $SHOP::DefaultShopData.saveData($SHOP::PriceSaveFileName);
     SHOP_updateAllPriceTags();
 
-    // TODO: Remove this item from all client's virtual inventories.
+    %cl.centerPrint("\c6" @ %db.uiName SPC "\c2is now single use", 4);
   }
 
   // Sells the client's player's equipped item. The client will no longer own this item after selling.
