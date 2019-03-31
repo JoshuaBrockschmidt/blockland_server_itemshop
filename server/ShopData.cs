@@ -47,7 +47,7 @@ function SHOP_ShopData::getPrice(%this, %item) {
 
   %found = %this.prices[%item];
   if (isObject(%found))
-    return %found.getPrice();
+    return %found.price;
   else
     return -1;
 }
