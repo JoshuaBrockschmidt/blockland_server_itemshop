@@ -110,6 +110,11 @@ package ItemShopPackage
       return;
     }
 
+    if ($SHOP::DefaultShopData.getPrice(%db) == 0) {
+      %cl.centerPrint("\c5Free items cannot be bought", 4);
+      return;
+    }
+
     if ($SHOP::DefaultShopData.getBuyOnce(%db)) {
       %cl.centerPrint("\c6" @ %db.uiName SPC "\c5is already buy once", 4);
       return;
@@ -139,6 +144,11 @@ package ItemShopPackage
 
     if ($SHOP::DefaultShopData.getPrice(%db) == -1) {
       %cl.centerPrint("\c6" @ %db.uiName SPC "\c5is not for sale", 4);
+      return;
+    }
+
+    if ($SHOP::DefaultShopData.getPrice(%db) == 0) {
+      %cl.centerPrint("\c5Free items cannot be bought", 4);
       return;
     }
 
