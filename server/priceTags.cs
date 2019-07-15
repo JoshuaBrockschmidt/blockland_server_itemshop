@@ -9,7 +9,8 @@ datablock StaticShapeData(SHOPItemTextShape)
 };
 
 // Update the price tag displayed above an item, which includes the name and price.
-function Item::SHOP_updatePriceTag(%this) {
+function Item::SHOP_updatePriceTag(%this)
+{
   %db = %this.getDatablock();
   %price = $SHOP::DefaultShopData.getPrice(%db);
   if (%price < 0) {
@@ -30,7 +31,8 @@ function Item::SHOP_updatePriceTag(%this) {
   %this.setShapeNameDistance($SHOP::PREF::PriceTagDist);
 }
 
-function SHOP_updateAllPriceTags() {
+function SHOP_updateAllPriceTags()
+{
   %itemCnt = $SHOP::DisplayItems.getCount();
   for (%i = 0; %i < %itemCnt; %i++) {
     %item = $SHOP::DisplayItems.getObject(%i);

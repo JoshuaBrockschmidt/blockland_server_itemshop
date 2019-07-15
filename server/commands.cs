@@ -1,6 +1,7 @@
 // Check if a client meets the admin level necessary to use admin commands.
 // @param GameConnection cl	Client to check admin level of.
-function SHOP_checkAdminLevel(%cl) {
+function SHOP_checkAdminLevel(%cl)
+{
   if (($SHOP::PREF::AdminLevel == 0 && %cl.isAdmin) ||
       ($SHOP::PREF::AdminLevel == 1 && %cl.isSuperAdmin)) {
     return true;
@@ -15,7 +16,8 @@ function SHOP_checkAdminLevel(%cl) {
 
 // Gets the item data for the item the client's player is looking at.
 // @return ItemData	Item data if the client's player is looking at an item and -1 otherwise.
-function GameConnection::SHOP_findItemFromEye(%this) {
+function GameConnection::SHOP_findItemFromEye(%this)
+{
   %pl = %this.player;
   if (!isObject(%pl)) {
     error("ERROR: Client has no player.");
@@ -45,7 +47,8 @@ package ItemShopPackage
   // @param int price   Price of item in score points. Must be greater than or equal to 0 and will
   //                 	be rounded down. Set price to 0 for free. Provide a negative price to make
   //                    item unbuyable.
-  function serverCmdSetPrice(%cl, %price) {
+  function serverCmdSetPrice(%cl, %price)
+  {
     // Check if client has the correct admin level.
     if (!SHOP_checkAdminLevel(%cl)) {
       %cl.chatMessage("You do not have permission to use this command");
@@ -85,13 +88,15 @@ package ItemShopPackage
     SHOP_updateAllPriceTags();
   }
 
-  function serverCmdSP(%cl, %price) {
+  function serverCmdSP(%cl, %price)
+  {
     serverCmdSetPrice(%cl, %price);
   }
 
   // Makes an item free after the first purchase.
   // @param GameConnection cl	Client attempting to set the price.
-  function serverCmdMakeBuyOnce(%cl) {
+  function serverCmdMakeBuyOnce(%cl)
+  {
     // Check if client has the correct admin level.
     if (!SHOP_checkAdminLevel(%cl)) {
       %cl.chatMessage("You do not have permission to use this command");
@@ -128,7 +133,8 @@ package ItemShopPackage
     %cl.centerPrint("\c6" @ %db.uiName SPC "\c2is now buy once", 4);
   }
 
-  function serverCmdMakeSingleUse(%cl) {
+  function serverCmdMakeSingleUse(%cl)
+  {
     // Check if client has the correct admin level.
     if (!SHOP_checkAdminLevel(%cl)) {
       %cl.chatMessage("You do not have permission to use this command");
@@ -167,7 +173,8 @@ package ItemShopPackage
 
   // Sells the client's player's equipped item. The client will no longer own this item after selling.
   // @param GameConnection cl	Client attempting to set the price.
-  function serverCmdSellItem(%cl) {
+  function serverCmdSellItem(%cl)
+  {
     // TODO: check if selling is allowed
     // TODO: check if client's player object has an item equipped
     // TODO: check if item is free
@@ -200,7 +207,8 @@ package ItemShopPackage
 
   // Accepts another client's item offer
   // @param GameConnection cl	Client with an offer.
-  function serverCmdAcceptItem(%cl) {
+  function serverCmdAcceptItem(%cl)
+  {
     if (!isObject(%cl)) {
       return;
     }

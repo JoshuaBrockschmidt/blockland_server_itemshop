@@ -36,7 +36,8 @@ function GameConnection::SHOP_tryBuyItem(%this, %item)
 
 // Adds an item to a player's inventory if there is an available slot.
 // @param ItemData 	item	Item to add.
-function Player::SHOP_addItem(%this, %item) {
+function Player::SHOP_addItem(%this, %item)
+{
   %item = nameToID(%item);
   // Code derived from Destiny's Event_addItem.
   %toolCount = %this.getDatablock().maxTools;

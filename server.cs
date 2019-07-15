@@ -39,7 +39,8 @@ $SHOP::PriceSaveFileName = $SHOP::DataPath @ "itemshop.csv";
 // We do not want to load shop data until all item add-ons have been loaded.
 package ItemShopLoadAfterPackage
 {
-  function GameConnection::onClientEnterGame(%this) {
+  function GameConnection::onClientEnterGame(%this)
+  {
     // A client cannot enter the game until all add-ons have been loaded
     // so this is a good place to load item data.
     if (isFile($SHOP::PriceSaveFileName)) {
