@@ -111,7 +111,10 @@ package ItemShopPackage
   function Armor::onCollision(%this, %obj, %col, %vec, %vel)
   {
     // TODO: allow players to pickup ammo
-    if(%col.getClassName() $= "Item")
+
+    // Prevent a player from picking up an item if they are in a minigame.
+    %cl = %obj.client;
+    if (isObject(%cl) && isObject(%cl.minigame) && %col.getClassName() $= "Item")
       return 0;
 
     return Parent::onCollision(%this, %obj, %col, %vec, %vel);
@@ -124,42 +127,48 @@ package ItemShopPackage
   {
     %ret = Parent::onTrigger(%this, %obj, %slot, %state);
 
-    // If player is clicking without an item in their hand, attempt a transaction.
-    if (%slot == 0 && %state == 1 && %obj.getMountedImage(0) == 0) {
-      // Find object player is looking at.
-      %eye = %obj.getEyePoint();
-      %end = vectorScale(%obj.getEyeVector(), 10);
-      %mask = $TypeMasks::FxBrickObjectType
-	 | $TypeMasks::InteriorObjectType
-	 | $TypeMasks::TerrainObjectType
-	 | $TypeMasks::ItemObjectType;
-      %raycast = containerRayCast(%eye, vectorAdd(%eye, %end), %mask, %obj);
-      %target = firstWord(%raycast);
+    // Only attempt a transaction if player is inside a minigame.
+    %cl = %obj.client;
+    if (isObject(%cl) && isObject(%cl.minigame)) {
+      // If player is clicking without an item in their hand, attempt a transaction.
+      if (%slot == 0 && %state == 1 && %obj.getMountedImage(0) == 0) {
+	// Find object player is looking at.
+	%eye = %obj.getEyePoint();
+	%end = vectorScale(%obj.getEyeVector(), 10);
+	%mask = $TypeMasks::FxBrickObjectType
+	   | $TypeMasks::InteriorObjectType
+	   | $TypeMasks::TerrainObjectType
+	   | $TypeMasks::ItemObjectType;
+	%raycast = containerRayCast(%eye, vectorAdd(%eye, %end), %mask, %obj);
+	%target = firstWord(%raycast);
 
-      // If target is an item, give client a transaction prompt.
-      if (isObject(%target)
-	 && %target.getClassName() $= "Item"
-	 && miniGameCanUse(%obj, %target)
-	 && %target.canPickup
-	 && isObject(%target.spawnBrick))
-	%obj.client.SHOP_tryBuyItem(%target.getDatablock());
+	// If target is an item, give client a transaction prompt.
+	if (isObject(%target)
+	    && %target.getClassName() $= "Item"
+	    && miniGameCanUse(%obj, %target)
+	    && %target.canPickup
+	    && isObject(%target.spawnBrick))
+	  %obj.client.SHOP_tryBuyItem(%target.getDatablock());
+      }
     }
 
     return %ret;
   }
 
-  // TODO: Refactor this
   function serverCmdDropTool(%cl, %slot)
   {
-    // Delete item without dropping it.
+    // Only delete item if client is in a minigame
     %pl = %cl.player;
-    if (%pl.tool[%slot] != 0) {
+    if (isObject(%cl.minigame) && %pl.tool[%slot] != 0) {
+      // Delete item without dropping it.
       %pl.tool[%slot] = 0;
       if (%this.weaponCount > 0)
 	%this.weaponCount--;
       messageClient(%cl, 'MsgItemPickup', '', %slot, 0);
       if (%slot == %pl.currTool)
 	%pl.unmountImage(0);
+    } else {
+      Parent::serverCmdDropTool(%cl, %slot);
     }
   }
 };
