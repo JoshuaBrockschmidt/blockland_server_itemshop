@@ -152,19 +152,21 @@ function SHOP_ShopData::loadData(%this, %filename) {
 
       if (!%csvReader.hasNextValue()) {
 	error("ERROR: Truncated item datablock on line" SPC %lineNum);
-	return false;
-      }
-
-      // Get the item datablock.
-      %db = %csvReader.readNextValue();
-      if (%db $= "" || !isObject(%db)) {
-	error("ERROR: Invalid item datablock on line" SPC %lineNum);
 	%file.close();
 	return false;
       }
 
+      // Get the item datablock.
+      %item = %csvReader.readNextValue();
+      if (%item $= "" || !isObject(%item) || %item.getClassName() !$= "ItemData") {
+	error("ERROR: Invalid ItemData \"" @ %item @ "\" on line" SPC %lineNum @ ". Ignoring.");
+	%lineNum++;
+	continue;
+      }
+
       if (!%csvReader.hasNextValue()) {
 	error("ERROR: Truncated price on line" SPC %lineNum);
+	%file.close();
 	return false;
       }
 
@@ -180,6 +182,7 @@ function SHOP_ShopData::loadData(%this, %filename) {
 
       if (!%csvReader.hasNextValue()) {
 	error("ERROR: Truncated buy once status on line" SPC %lineNum);
+	%file.close();
 	return false;
       }
 
@@ -191,8 +194,8 @@ function SHOP_ShopData::loadData(%this, %filename) {
 	return false;
       }
 
-      %this.setPrice(%db, %price);
-      %this.setBuyOnce(%db, %buyOnce);
+      %this.setPrice(%item, %price);
+      %this.setBuyOnce(%item, %buyOnce);
     }
     %lineNum++;
   }
