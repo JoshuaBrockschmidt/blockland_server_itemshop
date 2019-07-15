@@ -80,8 +80,11 @@ function serverCmdSHOP_confirmPurchase(%cl)
   // TODO: Check if player has room in their tool inventory.
   else {
     // If this item is buy once make the item free for future purchases.
-    if ($SHOP::DefaultShopData.getBuyOnce(%item))
+    if ($SHOP::DefaultShopData.getBuyOnce(%item)) {
       %cl.SHOP_inventory.addItem(%item);
+      if (!%cl.SHOP_saveInvData())
+	error("ERROR: Failed to save inventory data for \"" @ %cl.getName() @ "\"");
+    }
 
     %cl.setScore(%newScore);
 

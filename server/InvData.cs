@@ -46,27 +46,97 @@ function SHOP_InvData::hasItem(%this, %item)
 // @param string fn     Path of file relative to the Blockland folder.
 // @return boolean	True if data was successfully saved and false otherwise.
 function SHOP_InvData::saveData(%this, %fn) {
-  error("ERROR: Not implemented yet");
-  return false;
+  if (!isWriteableFileName(%fn)) {
+    error("ERROR: \"" @ %fn @ "\" is not writable");
+    return false;
+  }
+
+  // Write each item's datablock on its own line.
+  %file = new FileObject();
+  %file.openForWrite(%fn);
+  %itemCnt = %this.items.getCount();
+  for (%i = 0; %i < %itemCnt; %i++) {
+    %item = %this.items.getObject(%i).getName();
+    %file.writeLine(%item);
+  }
+  %file.close();
+
+  return true;
 }
 
 // Loads inventory data from a file.
 // @param string fn     Path of file relative to the Blockland folder.
 // @return boolean	True if data was successfully loaded and false otherwise.
 function SHOP_InvData::loadData(%this, %fn) {
-  error("ERROR: Not implemented yet");
-  return false;
+  if (!isFile(%fn)) {
+    error("ERROR: \"" @ %fn @ "\" is not a file");
+    return false;
+  }
+
+  %this.items.clear();
+
+  %file = new FileObject();
+  %file.openForRead(%fn);
+
+  // Read item datablocks off each line.
+  %lineNum = 0;
+  while (!%file.isEOF()) {
+    %item = trim(%file.readLine());
+    if (%item !$= "") {
+      if (!isObject(%item) || %item.getClassName() !$= "ItemData") {
+	error("ERROR: Invalid ItemData \"" @ %item @ "\" on line" SPC %lineNum @ ". Ignoring.");
+	%lineNum++;
+	continue;
+      }
+      %this.items.add(%item);
+    }
+    %lineNum++;
+  }
+
+  %file.close();
+
+  return true;
+}
+
+// Gets the path to a player's inventory data file.
+function GameConnection::SHOP_getInvPath(%this) {
+  if ($Server::LAN)
+    // Use LAN name as unique identifier.
+    return $SHOP::ClientDataPath @ strlwr(%this.LANname) @ ".itm";
+  else
+    // Use BLID as unique identifier.
+    return $SHOP::ClientDataPath @ %this.bl_id @ ".itm";
+}
+
+// Saves a player's inventory data.
+// @return boolean	True if data was successfully saved and false otherwise.
+function GameConnection::SHOP_saveInvData(%this) {
+  %invPath = %this.SHOP_getInvPath();
+  return %this.SHOP_inventory.saveData(%invPath);
+}
+
+// Loads a player's inventory data if it is saved.
+// @return boolean	True if data was successfully loaded or there was no
+//			data to load and false if something went wrong.
+function GameConnection::SHOP_loadInvData(%this) {
+  %invPath = %this.SHOP_getInvPath();
+  if (isFile(%invPath))
+    return %this.SHOP_inventory.loadData(%invPath);
+  else
+    return true;
 }
 
 package ItemShopPackage {
   function GameConnection::onClientEnterGame(%this) {
     Parent::onClientEnterGame(%this);
     %this.SHOP_inventory = SHOP_InvData();
-    // TODO: Load inventory data.
+    if (!%this.SHOP_loadInvData())
+      error("ERROR: Failed to load inventory data for \"" @ %this.getName() @ "\"");
   }
 
   function GameConnection::onClientLeaveGame(%this) {
-    // TODO: Save inventory data.
+    if (!%this.SHOP_saveInvData())
+      error("ERROR: Failed to write inventory data for \"" @ %this.getName() @ "\"");
     Parent::onClientEnterGame(%this);
   }
 };
