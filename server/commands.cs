@@ -84,6 +84,11 @@ package ItemShopPackage
       return;
     }
 
+    if ($SHOP::DefaultShopData.isPickup(%db)) {
+      %cl.centerPrint("\c5Pick-ups cannot be bought", 4);
+      return;
+    }
+
     if ($SHOP::DefaultShopData.getPrice(%db) == -1) {
       %cl.centerPrint("\c6" @ %db.uiName SPC "\c5is not for sale", 4);
       return;
@@ -119,6 +124,11 @@ package ItemShopPackage
     %db = %cl.SHOP_findItemFromEye().getDatablock();
     if (!isObject(%db)) {
       %cl.centerPrint("\c5No item found", 4);
+      return;
+    }
+
+    if ($SHOP::DefaultShopData.isPickup(%db)) {
+      %cl.centerPrint("\c5Pick-ups cannot be bought", 4);
       return;
     }
 
