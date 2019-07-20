@@ -121,7 +121,16 @@ package ItemShopPackage
     %cl = %obj.client;
     if (isObject(%cl) && isObject(%cl.minigame) && %col.getClassName() $= "Item") {
       %db = %col.getDatablock();
-      if (!$SHOP::DefaultShopData.isPickup(%db))
+      %dropped = !isObject(%col.spawnBrick);
+
+
+      // True if item is a dropped item and picking up dropped item is enabled.
+      %droppedPickup = %dropped && $SHOP::PREF::CanPickUpDropped;
+
+      // True if item is marked as pickup-able
+      %pickup = $SHOP::DefaultShopData.isPickup(%db);
+
+      if (!%pickup && !%droppedPickup)
 	return 0;
     }
 

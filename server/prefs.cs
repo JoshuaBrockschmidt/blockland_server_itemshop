@@ -14,6 +14,9 @@ $SHOP::PREF::CanGive = true;
 // Whether players can drop items.
 $SHOP::PREF::CanDrop = false;
 
+// Whether players can pickup dropped items (not items on bricks).
+$SHOP::PREF::CanPickUpDropped = false;
+
 // Distance within which players can view price tags.
 $SHOP::PREF::PriceTagDist = 30;
 
