@@ -165,9 +165,9 @@ package ItemShopPackage
 
   function serverCmdDropTool(%cl, %slot)
   {
-    // Only delete item if client is in a minigame
+    // Delete item if client is in a minigame and dropping is disallowed.
     %pl = %cl.player;
-    if (isObject(%cl.minigame) && %pl.tool[%slot] != 0) {
+    if (isObject(%cl.minigame) && %pl.tool[%slot] != 0 && !$SHOP::PREF::CanDrop) {
       // Delete item without dropping it.
       %pl.tool[%slot] = 0;
       if (%this.weaponCount > 0)

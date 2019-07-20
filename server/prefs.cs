@@ -11,6 +11,9 @@ $SHOP::PREF::CanSell = true;
 // Whether players can give items.
 $SHOP::PREF::CanGive = true;
 
+// Whether players can drop items.
+$SHOP::PREF::CanDrop = false;
+
 // Distance within which players can view price tags.
 $SHOP::PREF::PriceTagDist = 30;
 
