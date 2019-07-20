@@ -113,59 +113,67 @@ package ItemShopPackage
 
   // Disallows item pickup on collision.
   // Code derivative of Chrono's Script_ClickToPickup
-  function Armor::onCollision(%this, %obj, %col, %vec, %vel)
+  function Armor::onCollision(%this, %armor, %col, %vec, %vel)
   {
     // TODO: allow players to pickup ammo
 
     // Prevent a player from picking up an item if they are in a minigame and the item is not pickup-able.
-    %cl = %obj.client;
-    if (isObject(%cl) && isObject(%cl.minigame) && %col.getClassName() $= "Item") {
+    %cl = %armor.client;
+    if (isObject(%cl) && %col.getClassName() $= "Item") {
       %db = %col.getDatablock();
-      %dropped = !isObject(%col.spawnBrick);
+      %dropped = !isObject(%col.spawnBrick);  // TODO: Items spawned from bricks with events should be considered dropped.
 
-
-      // True if item is a dropped item and picking up dropped item is enabled.
-      %droppedPickup = %dropped && $SHOP::PREF::CanPickUpDropped;
+      // Lobby player types cannot pick up items.
+      // True if the player is a lobby player type.
+      %isLobby = %armor.getDatablock().SHOP_isLobby;
 
       // True if item is marked as pickup-able
       %pickup = $SHOP::DefaultShopData.isPickup(%db);
 
-      if (!%pickup && !%droppedPickup)
+      // Lobby players can only pick up pickup-able items from spawn bricks.
+      if (%isLobby && (%dropped || !%pickup))
+	return 0;
+
+      // True if item is a dropped item and picking up dropped item is enabled.
+      %droppedPickup = %dropped && $SHOP::PREF::CanPickUpDropped;
+
+      // Pick up behavior in minigames.
+      if (isObject(%cl.minigame) && !%pickup && !%droppedPickup)
 	return 0;
     }
 
-    return Parent::onCollision(%this, %obj, %col, %vec, %vel);
+    return Parent::onCollision(%this, %armor, %col, %vec, %vel);
   }
 
   // Players can buy items by clicking on them.
   // Players cannot pickup items off the ground.
   // Code derivative of Chrono's Script_ClickToPickup
-  function Armor::onTrigger(%this, %obj, %slot, %state)
+  function Armor::onTrigger(%this, %armor, %slot, %state)
   {
-    %ret = Parent::onTrigger(%this, %obj, %slot, %state);
+    %ret = Parent::onTrigger(%this, %armor, %slot, %state);
 
     // Only attempt a transaction if player is inside a minigame.
-    %cl = %obj.client;
+    %cl = %armor.client;
     if (isObject(%cl) && isObject(%cl.minigame)) {
       // If player is clicking without an item in their hand, attempt a transaction.
-      if (%slot == 0 && %state == 1 && %obj.getMountedImage(0) == 0) {
+      if (%slot == 0 && %state == 1 && %armor.getMountedImage(0) == 0) {
 	// Find object player is looking at.
-	%eye = %obj.getEyePoint();
-	%end = vectorScale(%obj.getEyeVector(), 10);
+	%eye = %armor.getEyePoint();
+	%end = vectorScale(%armor.getEyeVector(), 10);
 	%mask = $TypeMasks::FxBrickObjectType
 	   | $TypeMasks::InteriorObjectType
 	   | $TypeMasks::TerrainObjectType
 	   | $TypeMasks::ItemObjectType;
-	%raycast = containerRayCast(%eye, vectorAdd(%eye, %end), %mask, %obj);
+	%raycast = containerRayCast(%eye, vectorAdd(%eye, %end), %mask, %armor);
 	%target = firstWord(%raycast);
 
 	// If target is an item, give client a transaction prompt.
 	if (isObject(%target)
 	    && %target.getClassName() $= "Item"
-	    && miniGameCanUse(%obj, %target)
+	    && miniGameCanUse(%armor, %target)
 	    && %target.canPickup
 	    && isObject(%target.spawnBrick))
-	  %obj.client.SHOP_tryBuyItem(%target.getDatablock());
+	  %armor.client.SHOP_tryBuyItem(%target.getDatablock());
       }
     }
 
@@ -174,18 +182,28 @@ package ItemShopPackage
 
   function serverCmdDropTool(%cl, %slot)
   {
-    // Delete item if client is in a minigame and dropping is disallowed.
     %pl = %cl.player;
-    if (isObject(%cl.minigame) && %pl.tool[%slot] != 0 && !$SHOP::PREF::CanDrop) {
-      // Delete item without dropping it.
-      %pl.tool[%slot] = 0;
-      if (%this.weaponCount > 0)
-	%this.weaponCount--;
-      messageClient(%cl, 'MsgItemPickup', '', %slot, 0);
-      if (%slot == %pl.currTool)
-	%pl.unmountImage(0);
-    } else {
-      Parent::serverCmdDropTool(%cl, %slot);
+    if (isObject(%pl)) {
+      // True if client is in a minigame and dropping is disallowed.
+      %miniDisallow = isObject(%cl.minigame) && !$SHOP::PREF::CanDrop;
+
+      // True if client has a lobby player type.
+      %isLobby = %pl.getDatablock().SHOP_isLobby;
+
+      // True if selected tool slot has a tool in it.
+      %hasTool = %pl.tool[%slot] != 0;
+
+      if (%hasTool && (%miniDisallow || %isLobby)) {
+	// Delete item without dropping it.
+	%pl.tool[%slot] = 0;
+	if (%this.weaponCount > 0)
+	  %this.weaponCount--;
+	messageClient(%cl, 'MsgItemPickup', '', %slot, 0);
+	if (%slot == %pl.currTool)
+	  %pl.unmountImage(0);
+      }
     }
+
+    Parent::serverCmdDropTool(%cl, %slot);
   }
 };
