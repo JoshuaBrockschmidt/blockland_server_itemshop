@@ -13,9 +13,13 @@ function Item::SHOP_updatePriceTag(%this)
 {
   %db = %this.getDatablock();
   %price = $SHOP::DefaultShopData.getPrice(%db);
-  if (%price < 0) {
+  if (%price $= "" | %price == -1) {
     %price = "not for sale";
     %this.setShapeNameColor($SHOP::PREF::NotForSaleColor);
+  } else if (%price == -2) {
+    // Item is a pickup. Do not display a price tag.
+    %this.setShapeName("");
+    return;
   } else if (%price == 0) {
     %price = "free";
     %this.setShapeNameColor($SHOP::PREF::FreeColor);

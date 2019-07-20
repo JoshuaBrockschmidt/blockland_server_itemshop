@@ -171,11 +171,39 @@ package ItemShopPackage
     %cl.centerPrint("\c6" @ %db.uiName SPC "\c2is now single use", 4);
   }
 
+  // Makes the item a player is looking at pickup-able. Good for making ammo usable.
+  // @param GameConnection cl	Client making the request.
+  function serverCmdMakePickup(%cl)
+  {
+    // Check if client has the correct admin level.
+    if (!SHOP_checkAdminLevel(%cl)) {
+      %cl.chatMessage("You do not have permission to use this command");
+      return;
+    }
+
+    if (!isObject(%cl.player)) {
+      %cl.chatMessage("You must be spawned to use this command");
+      return;
+    }
+
+    // Find item the client's player is looking at if there is one.
+    %db = %cl.SHOP_findItemFromEye();
+    if (!isObject(%db)) {
+      %cl.centerPrint("\c5No item found", 4);
+      return;
+    }
+
+    $SHOP::DefaultShopData.makePickup(%db);
+    $SHOP::DefaultShopData.saveData($SHOP::PriceSaveFileName);
+    SHOP_updateAllPriceTags();
+  }
+
   // Sells the client's player's equipped item. The client will no longer own this item after selling.
   // @param GameConnection cl	Client attempting to set the price.
   function serverCmdSellItem(%cl)
   {
     // TODO: check if selling is allowed
+    // TODO: reject if the item is free or a pickup
     // TODO: check if client's player object has an item equipped
     // TODO: check if item is free
     // TODO: give player score back
@@ -197,7 +225,7 @@ package ItemShopPackage
     %giveTo = trim(%a0 SPC %a1 SPC %a2 SPC %a3 SPC %a4 SPC %a5 SPC %a6 SPC %a7 SPC %a8 SPC %a9 SPC %a10);
 
     // TODO: check if item giving is enabled
-    // TODO: check if client is already offering somethign
+    // TODO: check if client is already offering something
     // TODO: if item is buy only, check if recipient already has that item already
     // TODO: if item is single use, check if recipient has an extra slot and if the item can be equipped more than once
     // TODO: check if recipient has a pending offer

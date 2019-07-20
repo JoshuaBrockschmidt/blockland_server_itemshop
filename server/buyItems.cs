@@ -3,7 +3,11 @@
 // @param ItemData item		Item that client is trying to buy.
 function GameConnection::SHOP_tryBuyItem(%this, %item)
 {
+  if ($SHOP::DefaultShopData.isPickup(%item))
+    return;
+
   // TODO: Check if player has room in their tool inventory.
+
   %price = $SHOP::DefaultShopData.getPrice(%item);
   %newScore = %this.score - %price;
   %name = %item.uiName;
@@ -113,10 +117,13 @@ package ItemShopPackage
   {
     // TODO: allow players to pickup ammo
 
-    // Prevent a player from picking up an item if they are in a minigame.
+    // Prevent a player from picking up an item if they are in a minigame and the item is not pickup-able.
     %cl = %obj.client;
-    if (isObject(%cl) && isObject(%cl.minigame) && %col.getClassName() $= "Item")
-      return 0;
+    if (isObject(%cl) && isObject(%cl.minigame) && %col.getClassName() $= "Item") {
+      %db = %col.getDatablock();
+      if (!$SHOP::DefaultShopData.isPickup(%db))
+	return 0;
+    }
 
     return Parent::onCollision(%this, %obj, %col, %vec, %vel);
   }

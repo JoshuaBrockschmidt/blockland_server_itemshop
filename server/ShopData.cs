@@ -39,7 +39,7 @@ function SHOP_ShopData::setPrice(%this, %item, %price)
 
 // Gets the price of the item data.
 // @param ItemData item     Item datablock of item.
-// @return int	Price of item in score points. -1 if the item is not for sale.
+// @return int	Price of item in score points. -1 if the item is not for sale. -2 if the item is a pickup.
 function SHOP_ShopData::getPrice(%this, %item)
 {
   if (!isObject(%item) || %item.getClassName() !$= "ItemData") {
@@ -100,6 +100,43 @@ function SHOP_ShopData::getBuyOnce(%this, %item)
     return %priceData.buyOnce;
   else
     error("ERROR: Item is not for sale");
+}
+
+// Makes an item pickup-able. Call `::setPrice` or `::makeUnbuyable` to undo.
+// @param ItemData item 	Item data for item to make pickup-able.
+function SHOP_ShopData::makePickup(%this, %item)
+{
+  if (!isObject(%item) || %item.getClassName() !$= "ItemData") {
+    error("ERROR: Invalid ItemData");
+    return;
+  }
+  %item = %item.getName();
+
+  %found = %this.prices[%item];
+
+  // Set price as -2 to denote pickup. A bit of a hacky solution but it keeps things simple.
+  if (isObject(%found)) {
+    %found.setPrice(-2);
+  } else {
+    // Create a new price data object.
+    %newPriceData = SHOP_PriceData(%item, -2, $SHOP::PREF::BuyOnceByDefault);
+    if (isObject(%newPriceData)) {
+      %this.add(%newPriceData);
+      %this.prices[%item] = %newPriceData;
+    } else {
+      error("ERROR: Failed to create SHOP_PriceData");
+      return;
+    }
+  }
+}
+
+// Gets whether an item is pickup-able.
+// @param ItemData item 	Item data for item to make pickup-able.
+// @return boolean	True if the item is pickup-able and false otherwise.
+function SHOP_ShopData::isPickup(%this, %item)
+{
+  %price = %this.getPrice(%item);
+  return %price == -2;
 }
 
 // Clears all item prices making all items unbuyable.
