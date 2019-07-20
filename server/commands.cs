@@ -14,32 +14,6 @@ function SHOP_checkAdminLevel(%cl)
   return false;
 }
 
-// Gets the item data for the item the client's player is looking at.
-// @return ItemData	Item data if the client's player is looking at an item and -1 otherwise.
-function GameConnection::SHOP_findItemFromEye(%this)
-{
-  %pl = %this.player;
-  if (!isObject(%pl)) {
-    error("ERROR: Client has no player.");
-    return -1;
-  }
-
-  %eye = %pl.getEyePoint();
-  %end = vectorScale(%pl.getEyeVector(), 10);
-  %mask = $TypeMasks::FxBrickObjectType
-     | $TypeMasks::InteriorObjectType
-     | $TypeMasks::TerrainObjectType
-     | $TypeMasks::ItemObjectType;
-  %raycast = containerRayCast(%eye, vectorAdd(%eye, %end), %mask, %obj);
-  %target = firstWord(%raycast);
-
-  if (!isObject(%target) || %target.getClassName() !$= "Item") {
-    return -1;
-  } else {
-    return %target.getDatablock();
-  }
-}
-
 package ItemShopPackage
 {
   // Sets the price of an item.
@@ -70,7 +44,7 @@ package ItemShopPackage
     %price = mFloor(%price);
 
     // Find item the client's player is looking at if there is one.
-    %db = %cl.SHOP_findItemFromEye();
+    %db = %cl.SHOP_findItemFromEye().getDatablock();
     if (!isObject(%db)) {
       %cl.centerPrint("\c5No item found", 4);
       return;
@@ -104,7 +78,7 @@ package ItemShopPackage
     }
 
     // Get item the client's player is looking at.
-    %db = %cl.SHOP_findItemFromEye();
+    %db = %cl.SHOP_findItemFromEye().getDatablock();
     if (!isObject(%db)) {
       %cl.centerPrint("\c5No item found", 4);
       return;
@@ -142,7 +116,7 @@ package ItemShopPackage
     }
 
     // Get item the client's player is looking at.
-    %db = %cl.SHOP_findItemFromEye();
+    %db = %cl.SHOP_findItemFromEye().getDatablock();
     if (!isObject(%db)) {
       %cl.centerPrint("\c5No item found", 4);
       return;
@@ -187,7 +161,7 @@ package ItemShopPackage
     }
 
     // Find item the client's player is looking at if there is one.
-    %db = %cl.SHOP_findItemFromEye();
+    %db = %cl.SHOP_findItemFromEye().getDatablock();
     if (!isObject(%db)) {
       %cl.centerPrint("\c5No item found", 4);
       return;
@@ -203,6 +177,7 @@ package ItemShopPackage
   function serverCmdSellItem(%cl)
   {
     // TODO: check if selling is allowed
+    // TODO: check if player is alive
     // TODO: reject if the item is free or a pickup
     // TODO: check if client's player object has an item equipped
     // TODO: check if item is free

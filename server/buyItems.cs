@@ -157,23 +157,12 @@ package ItemShopPackage
     if (isObject(%cl) && isObject(%cl.minigame)) {
       // If player is clicking without an item in their hand, attempt a transaction.
       if (%slot == 0 && %state == 1 && %armor.getMountedImage(0) == 0) {
-	// Find object player is looking at.
-	%eye = %armor.getEyePoint();
-	%end = vectorScale(%armor.getEyeVector(), 10);
-	%mask = $TypeMasks::FxBrickObjectType
-	   | $TypeMasks::InteriorObjectType
-	   | $TypeMasks::TerrainObjectType
-	   | $TypeMasks::ItemObjectType;
-	%raycast = containerRayCast(%eye, vectorAdd(%eye, %end), %mask, %armor);
-	%target = firstWord(%raycast);
-
-	// If target is an item, give client a transaction prompt.
-	if (isObject(%target)
-	    && %target.getClassName() $= "Item"
-	    && miniGameCanUse(%armor, %target)
-	    && %target.canPickup
-	    && isObject(%target.spawnBrick))
-	  %armor.client.SHOP_tryBuyItem(%target.getDatablock());
+	%item = %cl.SHOP_findItemFromEye();
+	if (isObject(%item)
+	    && miniGameCanUse(%armor, %item)
+	    && %item.canPickup
+	    && isObject(%item.spawnBrick))
+	  %armor.client.SHOP_tryBuyItem(%item.getDatablock());
       }
     }
 

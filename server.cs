@@ -22,6 +22,7 @@ exec($SHOP::ServerPath @ "commands.cs");
 exec($SHOP::ServerPath @ "players.cs");
 exec($SHOP::ServerPath @ "prefs.cs");
 exec($SHOP::ServerPath @ "priceTags.cs");
+exec($SHOP::ServerPath @ "utils.cs");
 
 exec($SHOP::ServerPath @ "InvData.cs");
 exec($SHOP::ServerPath @ "PriceData.cs");
