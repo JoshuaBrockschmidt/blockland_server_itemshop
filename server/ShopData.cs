@@ -60,10 +60,8 @@ function SHOP_ShopData::getPrice(%this, %item)
 function SHOP_ShopData::makeUnbuyable(%this, %item)
 {
   %found = %this.prices[%item.getName()];
-  if (isObject(%found)) {
+  if (isObject(%found))
     %found.delete();
-    %this.remove(%found);
-  }
 }
 
 // Makes an item buy once or single use.
