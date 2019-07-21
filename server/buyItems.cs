@@ -183,13 +183,15 @@ package ItemShopPackage
       %hasTool = %pl.tool[%slot] != 0;
 
       if (%hasTool && (%miniDisallow || %isLobby)) {
-	// Delete item without dropping it.
-	%pl.tool[%slot] = 0;
-	if (%this.weaponCount > 0)
-	  %this.weaponCount--;
-	messageClient(%cl, 'MsgItemPickup', '', %slot, 0);
-	if (%slot == %pl.currTool)
-	  %pl.unmountImage(0);
+	if (%pl.tool[%slot].canDrop) {
+	  // Delete item without dropping it.
+	  %pl.tool[%slot] = 0;
+	  if (%this.weaponCount > 0)
+	    %this.weaponCount--;
+	  messageClient(%cl, 'MsgItemPickup', '', %slot, 0);
+	  if (%slot == %pl.currTool)
+	    %pl.unmountImage(0);
+	}
       }
     }
 
