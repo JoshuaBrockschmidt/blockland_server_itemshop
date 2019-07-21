@@ -121,7 +121,7 @@ package ItemShopPackage
     %cl = %armor.client;
     if (isObject(%cl) && %col.getClassName() $= "Item") {
       %db = %col.getDatablock();
-      %dropped = !isObject(%col.spawnBrick);  // TODO: Items spawned from bricks with events should be considered dropped.
+      %dropped = %col.SHOP_isDropped();
 
       // Lobby player types cannot pick up items.
       // True if the player is a lobby player type.
@@ -161,7 +161,7 @@ package ItemShopPackage
 	if (isObject(%item)
 	    && miniGameCanUse(%armor, %item)
 	    && %item.canPickup
-	    && isObject(%item.spawnBrick))
+	    && %item.SHOP_isDropped())
 	  %armor.client.SHOP_tryBuyItem(%item.getDatablock());
       }
     }

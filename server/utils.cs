@@ -3,7 +3,7 @@
 //
 
 // Gets the item object the client's player is looking at.
-// @return ItemData	Item object if the client's player is looking at an item and -1 otherwise.
+// @return Item	Item object if the client's player is looking at an item and -1 otherwise.
 function GameConnection::SHOP_findItemFromEye(%this)
 {
   %pl = %this.player;
@@ -26,4 +26,13 @@ function GameConnection::SHOP_findItemFromEye(%this)
   } else {
     return %target;
   }
+}
+
+// Checks if an item is dropped.
+// @return True if the item is dropped and false otherwise.
+function Item::SHOP_isDropped(%this)
+{
+  // Item is considered dropped if it either has no spawn brick or is collidable.
+  // This includes items dropped by players and items dropped via brick events.
+  return !isObject(%this.spawnBrick) || !%this.isStatic();
 }
