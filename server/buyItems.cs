@@ -23,6 +23,12 @@ function GameConnection::SHOP_tryBuyItem(%this, %item)
     %msg = "\c6You need\c2" SPC (-%newScore) SPC "\c6more points to purchase a\c2" SPC %name;
     %this.centerPrint(%msg, 4);
   }
+  else if (!$SHOP::DefaultShopData.getBuyOnce(%item) && !isObject(%this.player)) {
+    %this.centerPrint("\c6You cannot buy this item while dead", 4);
+  }
+  else if (!$SHOP::DefaultShopData.getBuyOnce(%item) && %this.player.SHOP_isInventoryFull()) {
+    %this.centerPrint("\c6Your inventory is full", 4);
+  }
   else {
     %this.SHOP_pendingItem = %item;
     // TODO: plural and singular form for "points"

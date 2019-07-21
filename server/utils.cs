@@ -27,3 +27,14 @@ function GameConnection::SHOP_findItemFromEye(%this)
     return %target;
   }
 }
+
+// Checks if a player's inventory is full.
+function Player::SHOP_isInventoryFull(%this)
+{
+  %toolCount = %this.getDatablock().maxTools;
+  for (%i = 0; %i < %toolCount; %i++) {
+    if (%this.tool[%i] == 0)
+      return false;
+  }
+  return true;
+}
