@@ -1,6 +1,5 @@
 //
-// Player types that cannot pick up items or drop them on the ground. Dropped items will simply be deleted from the
-// player's inventory.
+// Player types that cannot pick up or throw items.
 //
 
 if(ForceRequiredAddOn("Player_Quake") == $Error::AddOn_NotFound) {
@@ -13,7 +12,7 @@ if(ForceRequiredAddOn("Player_No_Jet") == $Error::AddOn_NotFound) {
 	return $Error::AddOn_NotFound;
 }
 
-// A standard player who cannot pick up items or drop them on the ground.
+// A standard player who cannot pick up or throw items.
 datablock PlayerData(PlayerLobbyStandard : PlayerStandardArmor)
 {
   SHOP_isLobby = true;

@@ -121,7 +121,7 @@ package ItemShopPackage
     %cl = %armor.client;
     if (isObject(%cl) && %col.getClassName() $= "Item") {
       %db = %col.getDatablock();
-      %dropped = %col.SHOP_isDropped();
+      %isStatic = %col.isStatic();
 
       // Lobby player types cannot pick up items.
       // True if the player is a lobby player type.
@@ -131,11 +131,11 @@ package ItemShopPackage
       %pickup = $SHOP::DefaultShopData.isPickup(%db);
 
       // Lobby players can only pick up pickup-able items from spawn bricks.
-      if (%isLobby && (%dropped || !%pickup))
+      if (%isLobby && (!%isStatic || !%pickup))
 	return 0;
 
-      // True if item is a dropped item and picking up dropped item is enabled.
-      %droppedPickup = %dropped && $SHOP::PREF::CanPickUpDropped;
+      // True if item is a non-static item and picking up non-static item is enabled.
+      %droppedPickup = !%isStatic && $SHOP::PREF::CanPickUpDropped;
 
       // Pick up behavior in minigames.
       if (isObject(%cl.minigame) && !%pickup && !%droppedPickup)
@@ -161,7 +161,7 @@ package ItemShopPackage
 	if (isObject(%item)
 	    && miniGameCanUse(%armor, %item)
 	    && %item.canPickup
-	    && %item.SHOP_isDropped())
+	    && %item.isStatic())
 	  %armor.client.SHOP_tryBuyItem(%item.getDatablock());
       }
     }
@@ -173,8 +173,8 @@ package ItemShopPackage
   {
     %pl = %cl.player;
     if (isObject(%pl)) {
-      // True if client is in a minigame and dropping is disallowed.
-      %miniDisallow = isObject(%cl.minigame) && !$SHOP::PREF::CanDrop;
+      // True if client is in a minigame and throwing item fromone's inventory is disallowed.
+      %miniDisallow = isObject(%cl.minigame) && !$SHOP::PREF::CanThrow;
 
       // True if client has a lobby player type.
       %isLobby = %pl.getDatablock().SHOP_isLobby;

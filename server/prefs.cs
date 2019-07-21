@@ -11,10 +11,10 @@ $SHOP::PREF::CanSell = true;
 // Whether players can give items.
 $SHOP::PREF::CanGive = true;
 
-// Whether players can drop items.
-$SHOP::PREF::CanDrop = false;
+// Whether players can throw items. If false, items dropped from a player's inventory will simply be deleted.
+$SHOP::PREF::CanThrow = false;
 
-// Whether players can pickup dropped items (not items on bricks).
+// Whether players can pickup non-static items (not items on bricks).
 $SHOP::PREF::CanPickUpDropped = false;
 
 // Distance within which players can view price tags.

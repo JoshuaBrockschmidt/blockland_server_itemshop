@@ -27,12 +27,3 @@ function GameConnection::SHOP_findItemFromEye(%this)
     return %target;
   }
 }
-
-// Checks if an item is dropped.
-// @return True if the item is dropped and false otherwise.
-function Item::SHOP_isDropped(%this)
-{
-  // Item is considered dropped if it either has no spawn brick or is collidable.
-  // This includes items dropped by players and items dropped via brick events.
-  return !isObject(%this.spawnBrick) || !%this.isStatic();
-}
