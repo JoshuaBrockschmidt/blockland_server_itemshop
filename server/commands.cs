@@ -44,12 +44,12 @@ package ItemShopPackage
     %price = mFloor(%price);
 
     // Find item the client's player is looking at if there is one.
-    %db = %cl.SHOP_findItemFromEye().getDatablock();
-    if (!isObject(%db)) {
+    %item = %cl.SHOP_findItemFromEye();
+    if (!isObject(%item)) {
       %cl.centerPrint("\c5No item found", 4);
       return;
     }
-
+    %db = %item.getDatablock();
     if (%price >= 0) {
       $SHOP::DefaultShopData.setPrice(%db, %price);
       %cl.centerPrint("\c2Price for\c6" SPC %db.uiName SPC "\c2set to\c6" SPC %price, 4);
@@ -78,11 +78,12 @@ package ItemShopPackage
     }
 
     // Get item the client's player is looking at.
-    %db = %cl.SHOP_findItemFromEye().getDatablock();
-    if (!isObject(%db)) {
+    %item = %cl.SHOP_findItemFromEye();
+    if (!isObject(%item)) {
       %cl.centerPrint("\c5No item found", 4);
       return;
     }
+    %db = %item.getDatablock();
 
     if ($SHOP::DefaultShopData.isPickup(%db)) {
       %cl.centerPrint("\c5Pick-ups cannot be bought", 4);
@@ -121,11 +122,12 @@ package ItemShopPackage
     }
 
     // Get item the client's player is looking at.
-    %db = %cl.SHOP_findItemFromEye().getDatablock();
-    if (!isObject(%db)) {
+    %item = %cl.SHOP_findItemFromEye();
+    if (!isObject(%item)) {
       %cl.centerPrint("\c5No item found", 4);
       return;
     }
+    %db = %item.getDatablock();
 
     if ($SHOP::DefaultShopData.isPickup(%db)) {
       %cl.centerPrint("\c5Pick-ups cannot be bought", 4);
@@ -171,11 +173,12 @@ package ItemShopPackage
     }
 
     // Find item the client's player is looking at if there is one.
-    %db = %cl.SHOP_findItemFromEye().getDatablock();
-    if (!isObject(%db)) {
+    %item = %cl.SHOP_findItemFromEye();
+    if (!isObject(%item)) {
       %cl.centerPrint("\c5No item found", 4);
       return;
     }
+    %db = %item.getDatablock();
 
     $SHOP::DefaultShopData.makePickup(%db);
     $SHOP::DefaultShopData.saveData($SHOP::PriceSaveFileName);
@@ -229,6 +232,7 @@ package ItemShopPackage
     // TODO: check if client has an offer
     // TODO: if item is buy once, make sure they don't already have the item
     // TODO: if item is single use, make sure they have an extra inventory space and don't already have that item in their inventory
+    // TODO: inform offerer of outcome
     error("ERROR: Not implemented yet");
   }
 };
