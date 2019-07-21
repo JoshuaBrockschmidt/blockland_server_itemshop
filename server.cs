@@ -17,6 +17,7 @@ if (isObject(SHOP_ServerGroup)) {
 }
 new ScriptGroup(SHOP_ServerGroup);
 
+exec($SHOP::ServerPath @ "ammoSupport.cs");
 exec($SHOP::ServerPath @ "buyItems.cs");
 exec($SHOP::ServerPath @ "commands.cs");
 exec($SHOP::ServerPath @ "players.cs");
@@ -49,6 +50,7 @@ package ItemShopLoadAfterPackage
       echo("Loading price data from \"" @ $SHOP::PriceSaveFileName @ "\"");
       $SHOP::DefaultShopData.loadData($SHOP::PriceSaveFileName);
     }
+    $SHOP::DefaultShopData.makeAmmoPickups();
     Parent::onClientEnterGame(%this);
 
     // Only need to run this script once so deactivate the package to prevent
