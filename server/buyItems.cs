@@ -185,20 +185,8 @@ package ItemShopPackage
       // True if client has a lobby player type.
       %isLobby = %pl.getDatablock().SHOP_isLobby;
 
-      // True if selected tool slot has a tool in it.
-      %hasTool = %pl.tool[%slot] != 0;
-
-      if (%hasTool && (%miniDisallow || %isLobby)) {
-	if (%pl.tool[%slot].canDrop) {
-	  // Delete item without dropping it.
-	  %pl.tool[%slot] = 0;
-	  if (%this.weaponCount > 0)
-	    %this.weaponCount--;
-	  messageClient(%cl, 'MsgItemPickup', '', %slot, 0);
-	  if (%slot == %pl.currTool)
-	    %pl.unmountImage(0);
-	}
-      }
+      if (%miniDisallow || %isLobby)
+	%cl.SHOP_deleteTool(%slot);
     }
 
     Parent::serverCmdDropTool(%cl, %slot);

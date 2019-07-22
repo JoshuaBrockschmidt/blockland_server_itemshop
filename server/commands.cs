@@ -189,13 +189,56 @@ package ItemShopPackage
   // @param GameConnection cl	Client attempting to set the price.
   function serverCmdSellItem(%cl)
   {
-    // TODO: check if selling is allowed
-    // TODO: check if player is alive
-    // TODO: reject if the item is free or a pickup
-    // TODO: check if client's player object has an item equipped
-    // TODO: check if item is free
-    // TODO: give player score back
-    error("ERROR: Not implemented yet");
+    if (!isObject(%cl))
+      return;
+
+    if (!isObject(%cl.minigame)) {
+      %cl.centerPrint("\c5You are not in a minigame", 4);
+      return;
+    }
+
+    if (!$SHOP::PREF::CanSell) {
+      %cl.centerPrint("\c5Selling is disabled", 4);
+      return;
+    }
+
+    %pl = %cl.player;
+    if (!isObject(%pl)) {
+      %cl.centerPrint("\c5You must be alive to sell", 4);
+      return;
+    }
+
+    %item = %pl.tool[%pl.currTool];
+    if (%item == 0) {
+      %cl.centerPrint("\c5Please select an item", 4);
+      return;
+    }
+
+    %price = $SHOP::DefaultShopData.getPrice(%item);
+    if (%price == 0) {
+      %cl.centerPrint("\c5You cannot sell free items", 4);
+      return;
+    }
+
+    // Cannot sell pickup of items not for sale.
+    if (%price < 0) {
+      %cl.centerPrint("\c5You cannot sell items not for sale", 4);
+      return;
+    }
+
+    // Make sure player owns the item.
+    if (!%cl.SHOP_inventory.hasItem(%item)) {
+      %cl.centerPrint("\c5You do not own this item.", 4);
+      return;
+    }
+
+    // Remove tool from virual and physical inventory and increment price.
+    %cl.SHOP_inventory.removeItem(%item);
+    if (!%cl.SHOP_saveInvData())
+      error("ERROR: Failed to save inventory data for \"" @ %cl.getName() @ "\"");
+
+    %cl.SHOP_deleteTool(%pl.currTool);
+    %cl.incScore(%price);
   }
 
   // Transfer an item from one client to another. The client will no longer own this item after giving it.

@@ -38,3 +38,22 @@ function Player::SHOP_isInventoryFull(%this)
   }
   return true;
 }
+
+// Deletes a tool from a client's player's inventory. Item will not be thrown. If slot is empty, nothing will happen.
+// @param integer slot	Tool slot containing item to delete.
+function GameConnection::SHOP_deleteTool(%this, %slot)
+{
+  %pl = %this.player;
+  if (isObject(%pl)) {
+    // Check if selected tool slot has a tool in it.
+    %tool = %pl.tool[%slot];
+    if (%tool != 0) {
+      if (%tool.canDrop) {
+	%pl.tool[%slot] = 0;
+	messageClient(%this, 'MsgItemPickup', '', %slot, 0);
+	if (%slot == %pl.currTool)
+	  %pl.unmountImage(0);
+      }
+    }
+  }
+}
