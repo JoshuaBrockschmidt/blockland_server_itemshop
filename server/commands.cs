@@ -209,36 +209,12 @@ package ItemShopPackage
     }
 
     %item = %pl.tool[%pl.currTool];
-    if (%item == 0) {
+    if (!isObject(%item)) {
       %cl.centerPrint("\c5Please select an item", 4);
       return;
     }
 
-    %price = $SHOP::DefaultShopData.getPrice(%item);
-    if (%price == 0) {
-      %cl.centerPrint("\c5You cannot sell free items", 4);
-      return;
-    }
-
-    // Cannot sell pickup of items not for sale.
-    if (%price < 0) {
-      %cl.centerPrint("\c5You cannot sell items not for sale", 4);
-      return;
-    }
-
-    // Make sure player owns the item.
-    if (!%cl.SHOP_inventory.hasItem(%item)) {
-      %cl.centerPrint("\c5You do not own this item.", 4);
-      return;
-    }
-
-    // Remove tool from virual and physical inventory and increment price.
-    %cl.SHOP_inventory.removeItem(%item);
-    if (!%cl.SHOP_saveInvData())
-      error("ERROR: Failed to save inventory data for \"" @ %cl.getName() @ "\"");
-
-    %cl.SHOP_deleteTool(%pl.currTool);
-    %cl.incScore(%price);
+    %cl.SHOP_trySellItem(%item);
   }
 
   // Transfer an item from one client to another. The client will no longer own this item after giving it.

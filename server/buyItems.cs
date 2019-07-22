@@ -56,12 +56,45 @@ function Player::SHOP_addItem(%this, %item)
     if (%tool == 0) {
       // Slot is available, so add item.
       %this.tool[%i] = %item;
-      %this.weaponCount++;
       // Use delay to prevent firing on add.
       schedule(100, 0, messageClient, %this.client, 'MsgItemPickup', '', %i, %item);
       break;
     }
   }
+}
+
+// Gives a client a prompt to sell an item.
+// @param ItemData item	Datablock of item to sell.
+function GameConnection::SHOP_trySellItem(%this, %item)
+{
+  if (!isObject(%item) || %item.getClassName() !$= "ItemData") {
+    error("ERROR: Invalid ItemData");
+    return;
+  }
+
+  %price = $SHOP::DefaultShopData.getPrice(%item);
+  if (%price == 0) {
+    %this.centerPrint("\c5You cannot sell free items", 4);
+    return;
+  }
+
+  // Cannot sell pickup of items not for sale.
+  if (%price < 0) {
+    %this.centerPrint("\c5You cannot sell items not for sale", 4);
+    return;
+  }
+
+  // Make sure player owns the item.
+  if (!%this.SHOP_inventory.hasItem(%item)) {
+    %this.centerPrint("\c5You do not own this item.", 4);
+    return;
+  }
+
+  %this.SHOP_pendingSell = %item;
+  // TODO: plural and singular form for "points"
+  %msg = "Would you like to sell your" SPC %item.uiName SPC "for" SPC %price SPC "points?";
+  %title = "Confirm Sell";
+  commandToClient(%this, 'MessageBoxYesNo', %title, %msg, 'SHOP_confirmSell', 'SHOP_declineSell');
 }
 
 // Confirms the purchase of an item.
@@ -103,8 +136,49 @@ function serverCmdSHOP_confirmPurchase(%cl)
     if (isObject(%cl.player))
       %cl.player.SHOP_addItem(%item);
   }
-  
+
   %cl.SHOP_pendingItem = "";
+}
+
+// Confirms the selling of an item.
+// @param GameConnection cl	Client who is confirming their sell.
+function serverCmdSHOP_confirmSell(%cl)
+{
+  %item = nameToID(%cl.SHOP_pendingSell);
+  if (!isObject(%item)) {
+    error("ERROR: No sell to confirm");
+    return;
+  }
+
+  %price = $SHOP::DefaultShopData.getPrice(%item);
+
+  // Check that item is still sellable.
+  if (%price <= 0) {
+    %msg = "This item can no longer be sold.";
+    commandToClient(%cl, 'MessageBoxOK', "Purchase Error", %msg);
+    return;
+  }
+  else {
+    %cl.SHOP_inventory.removeItem(%item);
+    if (!%cl.SHOP_saveInvData())
+      error("ERROR: Failed to save inventory data for \"" @ %cl.getName() @ "\"");
+
+    // Remove all items of the given type from the physical inventory.
+    %pl = %cl.player;
+    if (isObject(%pl)) {
+      %maxTools = %pl.getDatablock().maxTools;
+      for (%i = 0; %i < %maxTools; %i++) {
+	%tool = %pl.tool[%i];
+	if (%tool == %item.getID())
+	  %cl.SHOP_deleteTool(%i);
+      }
+    }
+
+    // Return points to client.
+    %cl.incScore(%price);
+  }
+
+  %cl.SHOP_pendingSell = "";
 }
 
 package ItemShopPackage
