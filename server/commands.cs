@@ -17,7 +17,6 @@ function SHOP_checkAdminLevel(%cl)
 package ItemShopPackage
 {
   // Sets the price of an item.
-  // @param GameConnection cl	Client attempting to set the price.
   // @param int price   Price of item in score points. Must be greater than or equal to 0 and will
   //                 	be rounded down. Set price to 0 for free. Provide a negative price to make
   //                    item unbuyable.
@@ -97,8 +96,7 @@ package ItemShopPackage
   }
 
   // Makes an item free after the first purchase.
-  // @param GameConnection cl	Client attempting to set the price.
-  function serverCmdMakeBuyOnce(%cl)
+  function serverCmdBuyOnce(%cl)
   {
     // Check if client has the correct admin level.
     if (!SHOP_checkAdminLevel(%cl)) {
@@ -146,7 +144,8 @@ package ItemShopPackage
     }
   }
 
-  function serverCmdMakeSingleUse(%cl)
+  // Makes an item a single use, wherein client must repurchase the item after each use.
+  function serverCmdSingleUse(%cl)
   {
     // Check if client has the correct admin level.
     if (!SHOP_checkAdminLevel(%cl)) {
@@ -194,8 +193,8 @@ package ItemShopPackage
     }
   }
 
-  // Makes the item a player is looking at pickup-able. Good for making ammo usable.
-  // @param GameConnection cl	Client making the request.
+  // Makes the item a player is looking at pick-up, wherein it can be picked up on touch like a normal item.
+  // Helpful for making ammo drops usable.
   function serverCmdMakePickup(%cl)
   {
     // Check if client has the correct admin level.
@@ -234,7 +233,6 @@ package ItemShopPackage
   }
 
   // Sells the client's player's equipped item. The client will no longer own this item after selling.
-  // @param GameConnection cl	Client attempting to set the price.
   function serverCmdSellItem(%cl)
   {
     if (!isObject(%cl))
@@ -269,7 +267,6 @@ package ItemShopPackage
   // The transfer will not happen if the would-be recipient already owns that item. Single use items can
   // only be given if the recipient has an empty inventory slot. Buy once items can be given regardless.
   // Finally, the recipient must accept the item offer.
-  // @param GameConnection cl	Client giving an item.
   // @param string a0 ... a10      Name of client to give the item to.
   function serverCmdGiveItem(%cl, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9, %a10)
   {
@@ -288,8 +285,7 @@ package ItemShopPackage
     error("ERROR: Not implemented yet");
   }
 
-  // Accepts another client's item offer
-  // @param GameConnection cl	Client with an offer.
+  // Accepts another client's item offer.
   function serverCmdAcceptItem(%cl)
   {
     if (!isObject(%cl)) {
