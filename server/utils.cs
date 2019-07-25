@@ -57,3 +57,15 @@ function GameConnection::SHOP_deleteTool(%this, %slot)
     }
   }
 }
+
+// Displays a chat message to all admins.
+// @param string msg	Message to display.
+function SHOP_chatMessageAllAdmins(%msg)
+{
+  %clientCount = ClientGroup.getCount();
+  for (%i = 0; %i < %clientCount; %i++) {
+    %cl = ClientGroup.getObject(%i);
+    if (%cl.isAdmin)
+      %cl.chatMessage(%msg);
+  }
+}
