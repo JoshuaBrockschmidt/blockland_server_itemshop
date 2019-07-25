@@ -62,6 +62,7 @@ function GameConnection::SHOP_deleteTool(%this, %slot)
 // @param string msg	Message to display.
 function SHOP_chatMessageAllAdmins(%msg)
 {
+  %msg = "\c2Item Shop\c6:" SPC %msg;
   %clientCount = ClientGroup.getCount();
   for (%i = 0; %i < %clientCount; %i++) {
     %cl = ClientGroup.getObject(%i);
