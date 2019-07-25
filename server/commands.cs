@@ -53,9 +53,20 @@ package ItemShopPackage
     if (%price >= 0) {
       $SHOP::DefaultShopData.setPrice(%db, %price);
       %cl.centerPrint("\c2Price for\c6" SPC %db.uiName SPC "\c2set to\c6" SPC %price, 4);
+      if ($SHOP::PREF::DisplayUpdates) {
+	if (%price == 0)
+	  %msg = "\c3" @ %cl.name SPC "\c6has made\c3" SPC %db.uiName SPC "\c6free";
+	else
+	  %msg = "\c3" @ %cl.name SPC "\c6has changed the price of\c3" SPC %db.uiName SPC "\c6to\c3" SPC %price;
+	SHOP_chatMessageAllAdmins(%msg);
+      }
     } else {
       $SHOP::DefaultShopData.makeUnbuyable(%db);
       %cl.centerPrint("\c6" @ %db.uiName SPC "\c2is no longer for sale", 4);
+      if ($SHOP::PREF::DisplayUpdates) {
+	%msg = "\c3" @ %cl.name SPC "\c6has made\c3" SPC %db.uiName SPC "\c6not for sale";
+	SHOP_chatMessageAllAdmins(%msg);
+      }
     }
 
     $SHOP::DefaultShopData.saveData($SHOP::PriceSaveFileName);
@@ -111,6 +122,10 @@ package ItemShopPackage
     SHOP_updateAllPriceTags();
 
     %cl.centerPrint("\c6" @ %db.uiName SPC "\c2is now buy once", 4);
+    if ($SHOP::PREF::DisplayUpdates) {
+      %msg = "\c3" @ %cl.name SPC "\c6has made\c3" SPC %db.uiName SPC "\c6buy once";
+      SHOP_chatMessageAllAdmins(%msg);
+    }
   }
 
   function serverCmdMakeSingleUse(%cl)
@@ -155,6 +170,10 @@ package ItemShopPackage
     SHOP_updateAllPriceTags();
 
     %cl.centerPrint("\c6" @ %db.uiName SPC "\c2is now single use", 4);
+    if ($SHOP::PREF::DisplayUpdates) {
+      %msg = "\c3" @ %cl.name SPC "\c6has made\c3" SPC %db.uiName SPC "\c6single use";
+      SHOP_chatMessageAllAdmins(%msg);
+    }
   }
 
   // Makes the item a player is looking at pickup-able. Good for making ammo usable.
@@ -183,6 +202,10 @@ package ItemShopPackage
     $SHOP::DefaultShopData.makePickup(%db);
     $SHOP::DefaultShopData.saveData($SHOP::PriceSaveFileName);
     SHOP_updateAllPriceTags();
+    if ($SHOP::PREF::DisplayUpdates) {
+      %msg = "\c3" @ %cl.name SPC "\c6has made\c3" SPC %db.uiName SPC "\c6a pickup";
+      SHOP_chatMessageAllAdmins(%msg);
+    }
   }
 
   // Sells the client's player's equipped item. The client will no longer own this item after selling.

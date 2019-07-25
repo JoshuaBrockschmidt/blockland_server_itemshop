@@ -32,4 +32,6 @@ $SHOP::PREF::BuyOnceColor = "0 1 1 1";
 // Price tag color for single use items.
 $SHOP::PREF::SingleUseColor = "0 0 1 1";
 
+// Whether to display a message to admins every time an item's price or status is updated.
+$SHOP::PREF::DisplayUpdates = true;
 // TODO: Use Blockland Glass preferences.
