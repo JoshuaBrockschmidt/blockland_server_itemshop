@@ -50,9 +50,23 @@ package ItemShopPackage
       return;
     }
     %db = %item.getDatablock();
+    %curPrice = $SHOP::DefaultShopData.getPrice(%db, %price);
     if (%price >= 0) {
+      if (%price == %curPrice) {
+	if (%curPrice == 0)
+	  %msg = "\c6" @ %db.uiName SPC "\c5is already free";
+	else
+	  %msg = "\c5Price for\c6" SPC %db.uiName SPC "\c5is already\c6" SPC %price;
+	%cl.centerPrint(%msg, 4);
+	return;
+      }
+
       $SHOP::DefaultShopData.setPrice(%db, %price);
-      %cl.centerPrint("\c2Price for\c6" SPC %db.uiName SPC "\c2set to\c6" SPC %price, 4);
+      if (%price == 0)
+	%msg = "\c6" @ %db.uiName SPC "\c2is now free";
+      else
+	%msg = "\c2Price for\c6" SPC %db.uiName SPC "\c2set to\c6" SPC %price;
+      %cl.centerPrint(%msg, 4);
       if ($SHOP::PREF::DisplayUpdates) {
 	if (%price == 0)
 	  %msg = "\c3" @ %cl.name SPC "\c6has made\c3" SPC %db.uiName SPC "\c6free";
@@ -61,6 +75,10 @@ package ItemShopPackage
 	SHOP_chatMessageAllAdmins(%msg);
       }
     } else {
+      if (%curPrice == -1) {
+	%cl.centerPrint("\c6" @ %db.uiName SPC "\c5is already not for sale", 4);
+	return;
+      }
       $SHOP::DefaultShopData.makeUnbuyable(%db);
       %cl.centerPrint("\c6" @ %db.uiName SPC "\c2is no longer for sale", 4);
       if ($SHOP::PREF::DisplayUpdates) {
@@ -199,11 +217,18 @@ package ItemShopPackage
     }
     %db = %item.getDatablock();
 
+    if ($SHOP::DefaultShopData.isPickup(%db)) {
+      %cl.centerPrint("\c6" @ %db.uiName SPC "\c5is already a pick-up", 4);
+      return;
+    }
+
     $SHOP::DefaultShopData.makePickup(%db);
     $SHOP::DefaultShopData.saveData($SHOP::PriceSaveFileName);
     SHOP_updateAllPriceTags();
+
+    %cl.centerPrint("\c6" @ %db.uiName SPC "\c2is now a pick-up", 4);
     if ($SHOP::PREF::DisplayUpdates) {
-      %msg = "\c3" @ %cl.name SPC "\c6has made\c3" SPC %db.uiName SPC "\c6a pickup";
+      %msg = "\c3" @ %cl.name SPC "\c6has made\c3" SPC %db.uiName SPC "\c6a pick-up";
       SHOP_chatMessageAllAdmins(%msg);
     }
   }
