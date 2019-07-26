@@ -195,7 +195,7 @@ package ItemShopPackage
 
   // Makes the item a player is looking at pick-up, wherein it can be picked up on touch like a normal item.
   // Helpful for making ammo drops usable.
-  function serverCmdMakePickup(%cl)
+  function serverCmdPickup(%cl)
   {
     // Check if client has the correct admin level.
     if (!SHOP_checkAdminLevel(%cl)) {
@@ -301,7 +301,7 @@ package ItemShopPackage
     error("ERROR: Not implemented yet");
   }
 
-  // Gives client a prompt to sell all items.
+  // Prompts a player confirming if they to sell all their items back for points.
   function serverCmdSellAllItems(%cl)
   {
     if (!isObject(%cl))
