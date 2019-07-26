@@ -277,11 +277,13 @@ package ItemShopPackage
     %giveTo = trim(%a0 SPC %a1 SPC %a2 SPC %a3 SPC %a4 SPC %a5 SPC %a6 SPC %a7 SPC %a8 SPC %a9 SPC %a10);
 
     // TODO: check if item giving is enabled
+    // TODO: check if client exists
     // TODO: check if client is already offering something
     // TODO: if item is buy only, check if recipient already has that item already
     // TODO: if item is single use, check if recipient has an extra slot and if the item can be equipped more than once
     // TODO: check if recipient has a pending offer
     // TODO: send offer
+    // TODO: make offer expire after a set time
     error("ERROR: Not implemented yet");
   }
 
@@ -297,5 +299,19 @@ package ItemShopPackage
     // TODO: if item is single use, make sure they have an extra inventory space and don't already have that item in their inventory
     // TODO: inform offerer of outcome
     error("ERROR: Not implemented yet");
+  }
+
+  // Gives client a prompt to sell all items.
+  function serverCmdSellAllItems(%cl)
+  {
+    if (!isObject(%cl))
+      return;
+
+    if (!$SHOP::PREF::CanSell) {
+      %cl.centerPrint("\c5Selling is disabled", 4);
+      return;
+    }
+
+    %cl.SHOP_trySellAllItems();
   }
 };

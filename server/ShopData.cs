@@ -83,7 +83,7 @@ function SHOP_ShopData::setBuyOnce(%this, %item, %buyOnce)
 }
 
 // Gets whether an item is buy once.
-// @param ItemData item 	Item data for item that is free or for sale.
+// @param ItemData item 	Item data for item that is for sale.
 // @return boolean	True if the item is buy once and false if it is single use.
 function SHOP_ShopData::getBuyOnce(%this, %item)
 {

@@ -42,6 +42,13 @@ function SHOP_InvData::hasItem(%this, %item)
   return %this.items.isMember(%item);
 }
 
+// Clears all items in inventory.
+function SHOP_InvData::reset(%this, %item)
+{
+  %this.items.delete();
+  %this.items = new SimSet();
+}
+
 // Save inventory data to a file.
 // @param string fn     Path of file relative to the Blockland folder.
 // @return boolean	True if data was successfully saved and false otherwise.

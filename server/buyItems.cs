@@ -97,6 +97,55 @@ function GameConnection::SHOP_trySellItem(%this, %item)
   commandToClient(%this, 'MessageBoxYesNo', %title, %msg, 'SHOP_confirmSell', 'SHOP_declineSell');
 }
 
+// Get the totals score points of a client's buy once and single use items.
+// @return Total score points.
+function GameConnection::SHOP_getNetWorth(%this)
+{
+  // Get total score points for buy once items in client's virtual inventory.
+  %total = 0;
+  for (%i = 0; %i < %this.SHOP_inventory.items.getCount(); %i++) {
+    %item = %this.SHOP_inventory.items.getObject(%i);
+    %price = $SHOP::DefaultShopData.getPrice(%item);
+    if (%price > 0)
+      if ($SHOP::DefaultShopData.getBuyOnce(%item))
+	%total += %price;
+  }
+
+  // Get total score points of single use items in client's player's inventory.
+  %pl = %this.player;
+  if (isObject(%pl)) {
+    %toolCount = %pl.getDatablock().maxTools;
+    for (%i = 0; %i < %toolCount; %i++) {
+      %item = %pl.tool[%i];
+      if (isObject(%item)) {
+	%price = $SHOP::DefaultShopData.getPrice(%item);
+	if (%price > 0)
+	  if (!$SHOP::DefaultShopData.getBuyOnce(%item))
+	    %total += %price;
+      }
+    }
+  }
+
+  return %total;
+}
+
+// Prompts a player confirming if they to sell all their items back for points.
+// @param ItemData item	Datablock of item to sell.
+function GameConnection::SHOP_trySellAllItems(%this, %item)
+{
+  // Get the client's net worth.
+  %netWorth = %this.SHOP_getNetWorth();
+
+  if (%netWorth == 0) {
+    %this.centerPrint("\c5You have no items to sell", 4);
+    return;
+  }
+
+  %msg = "Would you like to sell all your items for" SPC %netWorth SPC "points?";
+  %title = "Sell All Items";
+  commandToClient(%this, 'MessageBoxYesNo', %title, %msg, 'SHOP_confirmSellAll', 'SHOP_declineSellAll');
+}
+
 // Confirms the purchase of an item.
 // @param GameConnection cl	Client who is confirming their purchase request.
 function serverCmdSHOP_confirmPurchase(%cl)
@@ -179,6 +228,27 @@ function serverCmdSHOP_confirmSell(%cl)
   }
 
   %cl.SHOP_pendingSell = "";
+}
+
+// Sells all a client's items.
+function serverCmdSHOP_confirmSellAll(%cl)
+{
+  // Get the client's net worth.
+  %netWorth = %cl.SHOP_getNetWorth();
+
+  // Reset client's physical inventory.
+  %pl = %cl.player;
+  if (isObject(%pl))
+    %pl.clearTools();
+
+  // Reset client's virtual inventory.
+  %cl.SHOP_inventory.reset();
+  if (!%cl.SHOP_saveInvData())
+    error("ERROR: Failed to save inventory data for \"" @ %cl.getName() @ "\"");
+
+  // Give points back to client.
+  %cl.incScore(%netWorth);
+  %cl.chatMessage("\c6You sold all you items for\c3" SPC %netWorth SPC "\c6points");
 }
 
 package ItemShopPackage
