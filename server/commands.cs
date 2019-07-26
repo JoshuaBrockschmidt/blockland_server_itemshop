@@ -314,4 +314,13 @@ package ItemShopPackage
 
     %cl.SHOP_trySellAllItems();
   }
+
+  // Prompts a client confirming if they to reset their shop inventory.
+  function serverCmdResetItemData(%cl)
+  {
+    if (!isObject(%cl))
+      return;
+
+    %cl.SHOP_tryResetItemData();
+  }
 };

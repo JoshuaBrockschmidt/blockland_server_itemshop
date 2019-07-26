@@ -131,7 +131,7 @@ function GameConnection::SHOP_getNetWorth(%this)
 
 // Prompts a player confirming if they to sell all their items back for points.
 // @param ItemData item	Datablock of item to sell.
-function GameConnection::SHOP_trySellAllItems(%this, %item)
+function GameConnection::SHOP_trySellAllItems(%this)
 {
   // Get the client's net worth.
   %netWorth = %this.SHOP_getNetWorth();
@@ -144,6 +144,16 @@ function GameConnection::SHOP_trySellAllItems(%this, %item)
   %msg = "Would you like to sell all your items for" SPC %netWorth SPC "points?";
   %title = "Sell All Items";
   commandToClient(%this, 'MessageBoxYesNo', %title, %msg, 'SHOP_confirmSellAll', 'SHOP_declineSellAll');
+}
+
+// Prompts a client confirming if they to reset their shop inventory.
+function GameConnection::SHOP_tryResetItemData(%this)
+{
+  %msg = "Would you like to reset your item data?" @
+    "\nYou will lose all items you have bought." @
+    "\nYOU WILL NOT GET REFUNDED!";
+  %title = "Reset Item Data";
+  commandToClient(%this, 'MessageBoxYesNo', %title, %msg, 'SHOP_confirmResetItemData', 'SHOP_declineResetItemData');
 }
 
 // Confirms the purchase of an item.
@@ -236,7 +246,7 @@ function serverCmdSHOP_confirmSellAll(%cl)
   // Get the client's net worth.
   %netWorth = %cl.SHOP_getNetWorth();
 
-  // Reset client's physical inventory.
+  // Clear client's physical inventory.
   %pl = %cl.player;
   if (isObject(%pl))
     %pl.clearTools();
@@ -249,6 +259,22 @@ function serverCmdSHOP_confirmSellAll(%cl)
   // Give points back to client.
   %cl.incScore(%netWorth);
   %cl.chatMessage("\c6You sold all you items for\c3" SPC %netWorth SPC "\c6points");
+}
+
+// Resets a client's shop inventory.
+function serverCmdSHOP_confirmResetItemData(%cl)
+{
+  // Clear client's physical inventory.
+  %pl = %cl.player;
+  if (isObject(%pl))
+    %pl.clearTools();
+
+  // Reset client's virtual inventory.
+  %cl.SHOP_inventory.reset();
+  if (!%cl.SHOP_saveInvData())
+    error("ERROR: Failed to save inventory data for \"" @ %cl.getName() @ "\"");
+
+  %cl.chatMessage("\c6You reset your item data");
 }
 
 package ItemShopPackage
