@@ -49,10 +49,12 @@ package ItemShopPackage {
   {
     Parent::setItem(%this, %db);
 
-    %item = %this.item;
-    if (isObject(%item)) {
-      $SHOP::DisplayItems.add(%item);
-      %item.SHOP_updatePriceTag();
+    if (!%this.isBotHole) {
+      %item = %this.item;
+      if (isObject(%item)) {
+	$SHOP::DisplayItems.add(%item);
+	%item.SHOP_updatePriceTag();
+      }
     }
   }
 };
