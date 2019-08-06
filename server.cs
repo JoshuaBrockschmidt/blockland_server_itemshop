@@ -9,6 +9,7 @@ if ($Server::LAN)
 else
   $SHOP::DataPath = $SHOP::DataPath @ "net/";
 $SHOP::DataPath = $SHOP::DataPath @ strlwr($GamemodeDisplayName) @ "/";
+$SHOP::GamemodePath = "Add-Ons/Gamemode_" @ $GamemodeDisplayName @ "/";
 $SHOP::ClientDataPath = $SHOP::DataPath @ "clients/";
 
 if (isObject(SHOP_ServerGroup)) {
@@ -38,6 +39,7 @@ deactivatePackage(ItemShopPackage); // DEBUG
 activatePackage(ItemShopPackage);
 
 $SHOP::PriceSaveFileName = $SHOP::DataPath @ "itemshop.csv";
+$SHOP::DefaultPriceSaveFileName = $SHOP::GamemodePath @ "itemshop.csv";
 
 // We do not want to load shop data until all item add-ons have been loaded.
 package ItemShopLoadAfterPackage
@@ -46,10 +48,19 @@ package ItemShopLoadAfterPackage
   {
     // A client cannot enter the game until all add-ons have been loaded
     // so this is a good place to load item data.
-    if (isFile($SHOP::PriceSaveFileName)) {
-      echo("Loading price data from \"" @ $SHOP::PriceSaveFileName @ "\"");
-      $SHOP::DefaultShopData.loadData($SHOP::PriceSaveFileName);
+
+    // Load item data.
+    if (isFile($SHOP::PriceSaveFileName))
+      %loadFrom = $SHOP::PriceSaveFileName;
+    else if (isFile($SHOP::DefaultPriceSaveFileName))
+      %loadFrom = $SHOP::DefaultPriceSaveFileName;
+
+    if (%loadFrom !$= "") {
+      echo("Loading price data from \"" @ %loadFrom @ "\"");
+      $SHOP::DefaultShopData.loadData(%loadFrom);
     }
+
+    // Make ammo pickups.
     $SHOP::DefaultShopData.makeAmmoPickups();
     Parent::onClientEnterGame(%this);
 
