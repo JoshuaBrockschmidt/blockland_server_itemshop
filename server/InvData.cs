@@ -152,6 +152,6 @@ package ItemShopPackage
   {
     if (!%this.SHOP_saveInvData())
       error("ERROR: Failed to write inventory data for \"" @ %this.getName() @ "\"");
-    Parent::onClientEnterGame(%this);
+    Parent::onClientLeaveGame(%this);
   }
 };
