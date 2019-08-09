@@ -21,6 +21,7 @@ new ScriptGroup(SHOP_ServerGroup);
 exec($SHOP::ServerPath @ "ammoSupport.cs");
 exec($SHOP::ServerPath @ "buyItems.cs");
 exec($SHOP::ServerPath @ "commands.cs");
+exec($SHOP::ServerPath @ "events.cs");
 exec($SHOP::ServerPath @ "players.cs");
 exec($SHOP::ServerPath @ "prefs.cs");
 exec($SHOP::ServerPath @ "priceTags.cs");
