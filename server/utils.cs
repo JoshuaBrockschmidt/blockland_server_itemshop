@@ -58,6 +58,29 @@ function GameConnection::SHOP_deleteTool(%this, %slot)
   }
 }
 
+function Player::_SHOP_addItem(%this, %slot, %item) {
+  %this.tool[%slot] = %item;
+  messageClient(%this.client, 'MsgItemPickup', '', %slot, %item);
+}
+
+// Adds an item to a player's inventory if there is an available slot.
+// @param ItemData 	item	Item to add.
+function Player::SHOP_addItem(%this, %item)
+{
+  %item = nameToID(%item);
+  // Code derived from Destiny's Event_addItem.
+  %toolCount = %this.getDatablock().maxTools;
+  for (%i = 0; %i < %toolCount; %i++) {
+    %tool = %this.tool[%i];
+    if (%tool == 0) {
+      // Slot is available, so add item.
+      // Use delay to prevent firing on add.
+      %this.schedule(100, _SHOP_addItem, %i, %item);
+      break;
+    }
+  }
+}
+
 // Displays a chat message to all admins.
 // @param string msg	Message to display.
 function SHOP_chatMessageAllAdmins(%msg)

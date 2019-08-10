@@ -71,16 +71,10 @@ function Player::loadShopItems(%this)
   if (isFile(%savePath)) {
     %file = new FileObject();
     %file.openForRead(%savePath);
-    %maxTool = %this.getDatablock().maxTools;
-    %toolCount = 0;
-    while (!%file.isEOF() && %toolCount < %maxTool) {
+    while (!%file.isEOF() && !%this.SHOP_isInventoryFull()) {
       %itemDb = trim(%file.readLine());
-      if (%cl.SHOP_isSaveableItem(%itemDb)) {
-	%itemDb = nameToID(%itemDb);
-	%this.tool[%toolCount] = %itemDb;
-	messageClient(%cl, 'MsgItemPickup', '', %toolCount, %itemDb);
-	%toolCount++;
-      }
+      if (%cl.SHOP_isSaveableItem(%itemDb))
+	%this.SHOP_addItem(%itemDb);
     }
     %file.close();
   }

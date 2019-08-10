@@ -44,25 +44,6 @@ function GameConnection::SHOP_tryBuyItem(%this, %item)
   }
 }
 
-// Adds an item to a player's inventory if there is an available slot.
-// @param ItemData 	item	Item to add.
-function Player::SHOP_addItem(%this, %item)
-{
-  %item = nameToID(%item);
-  // Code derived from Destiny's Event_addItem.
-  %toolCount = %this.getDatablock().maxTools;
-  for (%i = 0; %i < %toolCount; %i++) {
-    %tool = %this.tool[%i];
-    if (%tool == 0) {
-      // Slot is available, so add item.
-      %this.tool[%i] = %item;
-      // Use delay to prevent firing on add.
-      schedule(100, 0, messageClient, %this.client, 'MsgItemPickup', '', %i, %item);
-      break;
-    }
-  }
-}
-
 // Gives a client a prompt to sell an item.
 // @param ItemData item	Datablock of item to sell.
 function GameConnection::SHOP_trySellItem(%this, %item)
