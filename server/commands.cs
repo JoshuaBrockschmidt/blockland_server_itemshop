@@ -7,7 +7,7 @@ function SHOP_checkAdminLevel(%cl)
     return true;
   }
 
-  %isHost = %this.isLocalConnection() || %this.bl_id == getNumKeyID();
+  %isHost = %cl.isLocalConnection() || %cl.bl_id == getNumKeyID();
   if ($SHOP::PREF::AdminLevel == 2 && %isHost)
     return true;
 
@@ -270,35 +270,29 @@ package ItemShopPackage
   // @param string a0 ... a10      Name of client to give the item to.
   function serverCmdGiveItem(%cl, %a0, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9, %a10)
   {
-    if (!isObject(%cl)) {
+    if (!isObject(%cl))
       return;
-    }
 
-    %giveTo = trim(%a0 SPC %a1 SPC %a2 SPC %a3 SPC %a4 SPC %a5 SPC %a6 SPC %a7 SPC %a8 SPC %a9 SPC %a10);
+    %name = trim(%a0 SPC %a1 SPC %a2 SPC %a3 SPC %a4 SPC %a5 SPC %a6 SPC %a7 SPC %a8 SPC %a9 SPC %a10);
+    %cl.SHOP_tryOfferItem(%name);
+  }
 
-    // TODO: check if item giving is enabled
-    // TODO: check if client exists
-    // TODO: check if client is already offering something
-    // TODO: if item is buy only, check if recipient already has that item already
-    // TODO: if item is single use, check if recipient has an extra slot and if the item can be equipped more than once
-    // TODO: check if recipient has a pending offer
-    // TODO: send offer
-    // TODO: make offer expire after a set time
-    error("ERROR: Not implemented yet");
+  // Cancels an offer to give an item to another player.
+  function serverCmdCancelOffer(%cl)
+  {
+    if (!isObject(%cl))
+      return;
+
+    %cl.SHOP_tryCancelOffer();
   }
 
   // Accepts another client's item offer.
   function serverCmdAcceptItem(%cl)
   {
-    if (!isObject(%cl)) {
+    if (!isObject(%cl))
       return;
-    }
 
-    // TODO: check if client has an offer
-    // TODO: if item is buy once, make sure they don't already have the item
-    // TODO: if item is single use, make sure they have an extra inventory space and don't already have that item in their inventory
-    // TODO: inform offerer of outcome
-    error("ERROR: Not implemented yet");
+    %cl.SHOP_tryAcceptItem();
   }
 
   // Prompts a player confirming if they to sell all their items back for points.
@@ -322,5 +316,34 @@ package ItemShopPackage
       return;
 
     %cl.SHOP_tryResetItemData();
+  }
+
+  function serverCmdShopHelp(%cl)
+  {
+    %bullet = "<font:palatino linotype:24>\c9  \x95";
+
+    %cl.chatMessage("<font:palatino linotype:35><shadow:2:2>\c6Item Shop Help");
+    %cl.chatMessage("<font:impact:20><shadow:2:2>\c6------------------------------------------");
+
+    %cl.chatMessage("<font:palatino linotype:25>\c6Admin Commands");
+    %cl.chatMessage(%bullet SPC "\c4/SetPrice <price> \c6OR \c4/sp <price>\c6 - Set the price of an item you are looking at.");
+    %cl.chatMessage(%bullet SPC "\c4/BuyOnce\c6 - Make an item free after the first purchase.");
+    %cl.chatMessage(%bullet SPC "\c4/SingleUse\c6 - Make an item single use after purchase.");
+    %cl.chatMessage(%bullet SPC "\c4/Pickup\c6 - Make an item a pickup. Behaves like a normal item when touched. Use \c4/SetPrice \c6to undo.");
+
+    %cl.chatMessage("<font:palatino linotype:25>\c6Events");
+    %cl.chatMessage(%bullet SPC "\c4Player -> SaveShopItems\c6 - Save the player's loadout, excluding items which are single use or not for sale.");
+    %cl.chatMessage(%bullet SPC "\c4Player -> LoadShopItems\c6 - Load the player's saved loadout, excluding items which are single use or not for sale.");
+
+    %cl.chatMessage("<font:palatino linotype:25>\c6General Commands");
+    %cl.chatMessage(%bullet SPC "\c4/SellItem\c6 - Sell an item for its current market price.");
+    %cl.chatMessage(%bullet SPC "\c4/GiveItem <player name>\c6 - Offers another player your equipped item.");
+    %cl.chatMessage(%bullet SPC "\c4/CancelOffer\c6 - Cancels an offer initiated by \c4/GiveItem\c6.");
+    %cl.chatMessage(%bullet SPC "\c4/AcceptItem\c6 - Accepts an item gifting offer from another player initiated by \c4/GiveItem\c6.");
+    %cl.chatMessage(%bullet SPC "\c4/SellAllItems\c6 - Sell every item you have bought.");
+    %cl.chatMessage(%bullet SPC "\c4/ResetItemData\c6 - Un-buy every item you have bought. Does not return score points.");
+    %cl.chatMessage(%bullet SPC "\c4/ShopHelp\c6 - Show this help");
+
+    %cl.chatMessage("<font:palatino linotype:20>\c6(Scroll up for more)");
   }
 };
